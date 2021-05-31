@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -107,9 +108,9 @@ class ServerApplicationTests {
 	@Test
 	public void deveRetornarEnderecoPeloId(){
 		Long id = 1L;
-		when(addressService.findById(id)).thenReturn(address1);
+		when(addressService.findById(id)).thenReturn(Optional.ofNullable(address1));
 
-		Address addressResult = addressService.findById(id);
+		Address addressResult = addressService.findById(id).orElse(null);
 		Assert.assertNotNull(addressResult);
 		Assert.assertEquals(id, addressResult.getId());
 		Assert.assertEquals("Rua Senador José Bonifácio", addressResult.getStreetName());
@@ -133,7 +134,7 @@ class ServerApplicationTests {
 	public void deveAtualizarEndereco(){
 		Long id = 3L;
 		Address newAddress = address3;
-		when(addressService.findById(id)).thenReturn(address3);
+		when(addressService.findById(id)).thenReturn(Optional.ofNullable(address3));
 		when(addressService.update(newAddress)).thenReturn(address3);
 
 		newAddress.setLongitude(null);
@@ -148,7 +149,7 @@ class ServerApplicationTests {
 	@Test
 	public void deveDeletarEndereco(){
 		Long id = 2L;
-		when(addressService.findById(id)).thenReturn(address2);
+		when(addressService.findById(id)).thenReturn(Optional.ofNullable(address2));
 
 		addressService.delete(id);
 		verify(addressRepository, times(0)).deleteById(id);

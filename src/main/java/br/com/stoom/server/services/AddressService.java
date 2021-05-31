@@ -1,13 +1,16 @@
 package br.com.stoom.server.services;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import br.com.stoom.server.entities.Address;
 import br.com.stoom.server.google.services.GoogleDTO;
 import br.com.stoom.server.google.services.GoogleService;
 import br.com.stoom.server.repositories.AddressRepository;
+import br.com.stoom.server.services.exceptions.AddressNotFoundException;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -31,14 +34,18 @@ public class AddressService {
 		return addressRepository.findAll();
 	}
 	
-	public Address findById(Long id) {
-		Address address = addressRepository.getById(id);
+	public Optional<Address> findById(Long id) {
+		Optional<Address> address = addressRepository.findById(id);
 		return address;
 	}
 	
 	public Address update(Address updateAddress) {
-		Address address = this.findById(updateAddress.getId());
+		Long id = updateAddress.getId();
+		if (id == null) throw new AddressNotFoundException("Endereço não foi encontrado.");
+		Address address = this.findById(id).orElse(null);
+		if (address == null) throw new AddressNotFoundException("Endereço não foi encontrado.");
 		fillLatitudeAndLongitude(address);
+		BeanUtils.copyProperties(updateAddress, address);
         return addressRepository.save(address);
 	}
 
@@ -52,7 +59,9 @@ public class AddressService {
 	}
 	
 	public void delete(Long id) {
-		Address address = this.findById(id);
+		if (id == null) throw new AddressNotFoundException("Endereço não foi encontrado.");
+		Address address = this.findById(id).orElse(null);
+		if (address == null) throw new AddressNotFoundException("Endereço não foi encontrado.");
 		addressRepository.delete(address);
 	}
 }
